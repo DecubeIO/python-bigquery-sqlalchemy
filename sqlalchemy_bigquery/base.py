@@ -633,24 +633,16 @@ class BigQueryDDLCompiler(DDLCompiler):
 
     def post_create_table(self, table):
         stmt = ""
+        bq_opts = table.dialect_options["bigquery"]
         opts = []
 
-        partitions = [
-            index for index in table.indexes 
-            if isinstance(index, _types.Partition)
-        ]
-        if partitions:
-            partition = partitions[0]
-            exp = partition.expressions[0]
-            if isinstance(exp, Column):
-                exp = exp.name
-            stmt += f"\nPARTITION BY {exp}"
+        partition = bq_opts.get("partition")
+        if partition:
+            stmt += f"\nPARTITION BY {partition}"
             if partition.partition_expiration_days:
                 opts.append(f"partition_expiration_days={partition.partition_expiration_days}")
             if partition.require_partition_filter:
                 opts.append(f"require_partition_filter={partition.require_partition_filter}")
-
-        bq_opts = table.dialect_options["bigquery"]
 
         if ("description" in bq_opts) or table.comment:
             description = process_string_literal(

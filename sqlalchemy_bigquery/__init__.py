@@ -41,8 +41,8 @@ from ._types import (
     STRUCT,
     TIME,
     TIMESTAMP,
-    Partition,
 )
+from ._schema import Partition
 
 __all__ = [
     "ARRAY",
