@@ -606,7 +606,9 @@ class BigQueryTypeCompiler(GenericTypeCompiler):
 
 
 class BigQueryDDLCompiler(DDLCompiler):
-
+    def visit_partition(self, partition):
+        return None
+        
     # BigQuery has no support for foreign keys.
     def visit_foreign_key_constraint(self, constraint):
         return None
@@ -630,8 +632,25 @@ class BigQueryDDLCompiler(DDLCompiler):
         return colspec
 
     def post_create_table(self, table):
-        bq_opts = table.dialect_options["bigquery"]
+        stmt = ""
         opts = []
+
+        partitions = [
+            index for index in table.indexes 
+            if isinstance(index, _types.Partition)
+        ]
+        if partitions:
+            partition = partitions[0]
+            exp = partition.expressions[0]
+            if isinstance(exp, Column):
+                exp = exp.name
+            stmt += f"\nPARTITION BY {exp}"
+            if partition.partition_expiration_days:
+                opts.append(f"partition_expiration_days={partition.partition_expiration_days}")
+            if partition.require_partition_filter:
+                opts.append(f"require_partition_filter={partition.require_partition_filter}")
+
+        bq_opts = table.dialect_options["bigquery"]
 
         if ("description" in bq_opts) or table.comment:
             description = process_string_literal(
@@ -647,9 +666,9 @@ class BigQueryDDLCompiler(DDLCompiler):
             )
 
         if opts:
-            return "\nOPTIONS({})".format(", ".join(opts))
+            stmt += "\nOPTIONS({})".format(", ".join(opts))
 
-        return ""
+        return stmt
 
     def visit_set_table_comment(self, create):
         table_name = self.preparer.format_table(create.element)

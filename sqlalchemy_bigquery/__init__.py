@@ -41,6 +41,7 @@ from ._types import (
     STRUCT,
     TIME,
     TIMESTAMP,
+    Partition,
 )
 
 __all__ = [
@@ -62,6 +63,7 @@ __all__ = [
     "STRUCT",
     "TIME",
     "TIMESTAMP",
+    "Partition",
 ]
 
 try:

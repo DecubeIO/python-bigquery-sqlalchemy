@@ -139,3 +139,20 @@ def get_columns(bq_schema):
         }
         for field in fields
     ]
+
+
+from sqlalchemy import Index
+
+
+class Partition(Index):
+    __visit_name__ = "partition"
+    
+    def __init__(
+        self, *args, 
+        partition_expiration_days=None, 
+        require_partition_filter=False, 
+        **kwargs,
+    ):
+        self.partition_expiration_days = partition_expiration_days
+        self.require_partition_filter = require_partition_filter
+        super().__init__(*args, **kwargs)
