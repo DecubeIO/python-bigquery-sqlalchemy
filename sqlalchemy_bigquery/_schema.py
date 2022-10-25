@@ -1,9 +1,9 @@
-from sqlalchemy import Column
+from sqlalchemy.sql.schema import Column, SchemaItem
 from sqlalchemy.sql.functions import Function
 
 
-class Partition:
-    __visit_name__ = "partition"
+class Partition(SchemaItem):
+    __visit_name__ = "partition" 
     
     def __init__(
         self, expr: str | Column | Function, 

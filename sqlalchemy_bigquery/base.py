@@ -606,9 +606,6 @@ class BigQueryTypeCompiler(GenericTypeCompiler):
 
 
 class BigQueryDDLCompiler(DDLCompiler):
-    def visit_partition(self, partition):
-        return None
-        
     # BigQuery has no support for foreign keys.
     def visit_foreign_key_constraint(self, constraint):
         return None
